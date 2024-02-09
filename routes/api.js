@@ -24,11 +24,20 @@ module.exports = function (app) {
       comments: {
       type: Array,
       default: []
-    }
+    },
+      commentcount:{
+      type: Number,
+      default: 0
+        }
  });
 
   app.route('/api/books')
-    .get(function (req, res){
+    .get(async (req, res)=>{
+      try{
+        let Book = mongoose.model("Book", bookSchema);
+        let book_list = await Book.find({}).select({__v: 0, comments: 0});
+        return res.json(book_list);
+    }catch(err){return res.json({error: err})}
       //response will be array of book objects
       //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
     })
