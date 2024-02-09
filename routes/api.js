@@ -98,8 +98,16 @@ module.exports = function (app) {
       //json res format same as .get
     })
     
-    .delete(function(req, res){
+    .delete(async(req, res)=>{
+      try{
       let bookid = req.params.id;
+      Book.findByIdAndRemove(bookid, (error, removedBook) =>  {
+        if(error||!removedBook){return res.type('txt').send('no book exists');}
+        else{
+          return res.type('txt').send('delete successful');
+        }
+      });
+    }catch(err){return res.json({error: err})}
       //if successful response will be 'delete successful'
     });
   
