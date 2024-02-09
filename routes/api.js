@@ -36,7 +36,7 @@ module.exports = function (app) {
   app.route('/api/books')
     .get(async (req, res)=>{
       try{
-        let book_list = await Book.find({}).select({__v: 0, comments: 0});
+        let book_list = await Book.find({});
         return res.json(book_list);
     }catch(err){return res.json({error: err})}
       //response will be array of book objects
@@ -60,7 +60,15 @@ module.exports = function (app) {
       //response will contain new book object including atleast _id and title
     })
     
-    .delete(function(req, res){
+    .delete(async(req, res)=>{
+      try{ 
+Book.deleteMany({}, (error, collection)=>{
+  if(error){return res.type('txt').send('could not delete');}
+  else{
+return res.type('txt').send('complete delete successful');
+}
+});
+    }catch(err){return res.type('txt').send('could not delete');}
       //if successful response will be 'complete delete successful'
     });
 
