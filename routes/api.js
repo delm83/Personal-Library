@@ -31,10 +31,11 @@ module.exports = function (app) {
         }
  });
 
+ let Book = mongoose.model("Book", bookSchema);
+
   app.route('/api/books')
     .get(async (req, res)=>{
       try{
-        let Book = mongoose.model("Book", bookSchema);
         let book_list = await Book.find({}).select({__v: 0, comments: 0});
         return res.json(book_list);
     }catch(err){return res.json({error: err})}
@@ -44,7 +45,6 @@ module.exports = function (app) {
     
     .post(async (req, res)=>{
       try{
-        let Book = mongoose.model("Book", bookSchema);
         let title = req.body.title;
 
         if(!title){
@@ -67,8 +67,15 @@ module.exports = function (app) {
 
 
   app.route('/api/books/:id')
-    .get(function (req, res){
+   .get(async (req, res)=>{
+      try{
       let bookid = req.params.id;
+      let inputBook = await Book.findById(bookid)
+      if(inputBook){
+        return res.json({title: inputBook.title, _id: inputBook._id, comments: inputBook.comments}); 
+      }
+      else return res.type('txt').send('no book exists');
+    }catch(err){return res.json({error: err})}
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
     })
     
