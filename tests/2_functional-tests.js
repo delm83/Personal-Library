@@ -13,6 +13,8 @@ const server = require('../server');
 
 chai.use(chaiHttp);
 
+let testid;
+
 suite('Functional Tests', function() {
 
   /*
@@ -48,6 +50,7 @@ suite('Functional Tests', function() {
           title: 'Misery'
         })
         .end(function(err, res){
+          testid = res.body._id;
           assert.equal(res.status, 200);
           assert.isObject(res.body, 'response should be an object');
           assert.property(res.body, '_id', 'returned object should contain _id');
@@ -64,6 +67,7 @@ suite('Functional Tests', function() {
           title: ''
         })
         .end(function(err, res){
+          assert.equal(res.status, 200);
         assert.equal(res.text, 'missing required field title');
        done()
         });
@@ -74,7 +78,17 @@ suite('Functional Tests', function() {
     suite('GET /api/books => array of books', function(){
       
       test('Test GET /api/books',  function(done){
-        //done();
+        chai.request(server)
+        .keepOpen()
+        .get('/api/books')
+        .end(function(err, res){
+          assert.equal(res.status, 200);
+          assert.isArray(res.body, 'response should be an array');
+          assert.property(res.body[0], 'commentcount', 'Books in array should contain commentcount');
+          assert.property(res.body[0], 'title', 'Books in array should contain title');
+          assert.property(res.body[0], '_id', 'Books in array should contain _id');
+       done()
+        });
       });      
       
     });
@@ -83,11 +97,28 @@ suite('Functional Tests', function() {
     suite('GET /api/books/[id] => book object with [id]', function(){
       
       test('Test GET /api/books/[id] with id not in db',  function(done){
-        //done();
+        chai.request(server)
+        .keepOpen()
+        .get('/api/books/65c664ce3129600808657ebb')
+        .end(function(err, res){
+          assert.equal(res.status, 200);
+          assert.equal(res.text, 'no book exists');
+       done()
+        });
       });
       
       test('Test GET /api/books/[id] with valid id in db',  function(done){
-        //done();
+        chai.request(server)
+        .keepOpen()
+        .get('/api/books/'+testid)
+        .end(function(err, res){
+          assert.equal(res.status, 200);
+          assert.isObject(res.body, 'response should be an object');
+          assert.equal(res.body.title, 'Misery');
+          assert.property(res.body, '_id', 'returned object should contain _id');
+          assert.property(res.body, 'comments', 'returned object should contain comments');
+       done()
+        });
       });
       
     });
