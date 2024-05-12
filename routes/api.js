@@ -63,10 +63,9 @@ module.exports = function (app) {
     .delete(async(req, res)=>{
       try{ 
 Book.deleteMany({}, (error, collection)=>{
-  if(error){return res.type('txt').send('could not delete');}
-  else{
-return res.type('txt').send('complete delete successful');
-}
+  return error?
+  res.type('txt').send('could not delete')
+ :res.type('txt').send('complete delete successful');
 });
     }catch(err){return res.type('txt').send('could not delete');}
       //if successful response will be 'complete delete successful'
@@ -79,10 +78,9 @@ return res.type('txt').send('complete delete successful');
       try{
       let bookid = req.params.id;
       let inputBook = await Book.findById(bookid)
-      if(inputBook){
-        return res.json({title: inputBook.title, _id: inputBook._id, comments: inputBook.comments}); 
-      }
-      else return res.type('txt').send('no book exists');
+      return inputBook?
+      res.json({title: inputBook.title, _id: inputBook._id, comments: inputBook.comments})
+    : res.type('txt').send('no book exists');
     }catch(err){return res.json({error: err})}
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
     })
@@ -110,13 +108,11 @@ return res.type('txt').send('complete delete successful');
       try{
       let bookid = req.params.id;
       Book.findByIdAndRemove(bookid, (error, removedBook) =>  {
-        if(error||!removedBook){return res.type('txt').send('no book exists');}
-        else{
-          return res.type('txt').send('delete successful');
-        }
+        return error||!removedBook?
+        res.type('txt').send('no book exists')
+       :res.type('txt').send('delete successful');
       });
     }catch(err){return res.json({error: err})}
       //if successful response will be 'delete successful'
     });
-  
-};
+  };
